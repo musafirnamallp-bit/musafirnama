@@ -226,3 +226,16 @@ test("published copy does not restore the removed fake social proof", () => {
       `${path}: removed unsupported trust claim has returned`);
   }
 });
+
+test("prerendered enquiries cannot submit personal details as URL parameters before hydration", () => {
+  for (const path of ["/quotes", "/customize"]) {
+    const { html } = pages.get(resolveLocal(new URL(path, origin)).file);
+    const form = html.match(/<form\b[^>]*>[\s\S]*?<\/form>/i)?.[0];
+    assert.ok(form, `${path}: missing enquiry form`);
+    assert.equal(tags(form, "form")[0].method, "post", `${path}: native fallback must never use GET`);
+    assert.match(form, /<fieldset\b[^>]*\bdisabled(?:="")?/, `${path}: inputs must wait for the submit handler`);
+    const submit = tags(form, "button").find(button => button.type === "submit");
+    assert.ok(submit && Object.hasOwn(submit, "disabled"), `${path}: submit must be disabled before hydration`);
+    assert.match(html, /<noscript>[\s\S]*?Enable JavaScript[\s\S]*?<\/noscript>/i, `${path}: no-script users need a fallback`);
+  }
+});

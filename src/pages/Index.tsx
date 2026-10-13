@@ -6,11 +6,14 @@ import CustomizationSection from "@/components/CustomizationSection";
 import TestimonialSection from "@/components/TestimonialSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
+import { useLocation } from "react-router-dom";
 
-const Index = () => (
+const Index = () => {
+  const { pathname } = useLocation();
+  return (
   <div className="min-h-screen">
     <Navigation />
-    <main id="main-content" tabIndex={-1}>
+    <main id="main-content" data-page-path={pathname} tabIndex={-1}>
       <HeroSection />
       <TopPackages />
       <HowItWorks />
@@ -21,5 +24,6 @@ const Index = () => (
     <Footer />
   </div>
 );
+};
 
 export default Index;

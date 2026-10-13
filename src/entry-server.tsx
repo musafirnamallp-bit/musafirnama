@@ -1,5 +1,5 @@
 import { renderToPipeableStream } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import { PassThrough } from "node:stream";
 import App from "./App";
 export { getPageMetadata, structuredData, publicPaths, prerenderPaths, absoluteUrl } from "./lib/seo";

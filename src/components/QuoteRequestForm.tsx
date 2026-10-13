@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Loader2, MapPin, SlidersHorizontal, Users } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -21,12 +21,14 @@ const money = (value: string) => Number.isFinite(Number(value)) && Number(value)
   ? `₹${Number(value).toLocaleString("en-IN")}` : "Not specified";
 
 export default function QuoteRequestForm({ customize = false }: { customize?: boolean }) {
+  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const query = searchParams.toString();
   const [values, setValues] = useState<QuoteValues>(emptyQuote);
   const [errors, setErrors] = useState<QuoteErrors>({});
   const [today, setToday] = useState("");
   const [pending, setPending] = useState(false);
+  const [ready, setReady] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [preferencesOpen, setPreferencesOpen] = useState(customize);
@@ -55,6 +57,7 @@ export default function QuoteRequestForm({ customize = false }: { customize?: bo
 
   useEffect(() => {
     mounted.current = true;
+    setReady(true);
     return () => {
       mounted.current = false;
       controller.current?.abort();
@@ -93,7 +96,7 @@ export default function QuoteRequestForm({ customize = false }: { customize?: bo
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (inFlight.current || accepted.current) return;
+    if (!ready || inFlight.current || accepted.current) return;
     startForm();
     const nextErrors = validateQuote(values);
     setErrors(nextErrors);
@@ -134,7 +137,7 @@ export default function QuoteRequestForm({ customize = false }: { customize?: bo
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main id="main-content" tabIndex={-1} className="container mx-auto max-w-6xl px-4 py-10 outline-none md:py-14">
+      <main id="main-content" data-page-path={pathname} tabIndex={-1} className="container mx-auto max-w-6xl px-4 py-10 outline-none md:py-14">
         {submitted ? (
           <section className="mx-auto max-w-2xl py-12 text-center">
             <CheckCircle2 className="mx-auto mb-6 h-14 w-14 text-primary" aria-hidden="true" />
@@ -154,9 +157,11 @@ export default function QuoteRequestForm({ customize = false }: { customize?: bo
               <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">Your next journey</p>
               <h1 className="text-3xl font-bold leading-tight md:text-5xl">{customize ? "Make the trip your own" : "Let's plan your holiday"}</h1>
               <p className="mt-4 text-lg text-muted-foreground">Share your destination, dates and budget for a personalized travel quote. There is no booking commitment.</p>
+              {(siteConfig.email || siteConfig.phone) && <p className="mt-4 text-sm text-muted-foreground">Prefer to contact us directly? {siteConfig.email && <a href={`mailto:${siteConfig.email}?subject=Holiday%20enquiry`} className="font-medium text-primary underline underline-offset-4">Email your travel plans</a>}{siteConfig.email && siteConfig.phone && " or "}{siteConfig.phone && <a href={`tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`} className="font-medium text-primary underline underline-offset-4">call us</a>}.</p>}
             </header>
-            <form onSubmit={handleSubmit} noValidate onFocusCapture={startForm} aria-busy={pending} className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <fieldset disabled={pending} className="min-w-0 space-y-6">
+            <noscript><p className="mb-6 rounded-lg border p-4">Enable JavaScript to use the enquiry form.{siteConfig.email && <> You can also <a className="underline" href={`mailto:${siteConfig.email}`}>email us about your trip</a>.</>}</p></noscript>
+            <form method="post" onSubmit={handleSubmit} noValidate onFocusCapture={startForm} aria-busy={pending} className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <fieldset disabled={!ready || pending} className="min-w-0 space-y-6">
                 <legend className="sr-only">Travel quote request</legend>
                 <Card><CardContent className="space-y-5 pt-6">
                   <h2 className="flex items-center gap-2 text-xl font-semibold"><MapPin className="h-5 w-5" aria-hidden="true" />Trip details</h2>
@@ -201,7 +206,7 @@ export default function QuoteRequestForm({ customize = false }: { customize?: bo
                   <p className="text-xs text-muted-foreground">Fields marked * are required. By submitting, you ask Musafirnama to contact you about this trip. Read our <Link to="/privacy" className="underline underline-offset-2">privacy notice</Link>.</p>
                   {Object.values(errors).some(Boolean) && <p role="alert" className="text-sm text-destructive">Please check the highlighted fields above.</p>}
                   {submitError && <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"><p>{submitError}</p>{siteConfig.email && <a href={`mailto:${siteConfig.email}`} className="mt-2 inline-block underline">Contact us by email</a>}</div>}
-                  <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={pending}>{pending ? <><Loader2 className="animate-spin" aria-hidden="true" />Sending your request…</> : <>Get my travel quote<ArrowRight aria-hidden="true" /></>}</Button>
+                  <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={!ready || pending}>{pending ? <><Loader2 className="animate-spin" aria-hidden="true" />Sending your request…</> : <>Get my travel quote<ArrowRight aria-hidden="true" /></>}</Button>
                 </CardContent></Card>
               </fieldset>
 

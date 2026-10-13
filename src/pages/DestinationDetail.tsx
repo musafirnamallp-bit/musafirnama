@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useLocation, Link } from "react-router-dom";
 import { ArrowRight, Check, ChevronRight, Clock, FileDown, MapPin, Route, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { travelGuides } from "@/lib/travelGuides";
 
 const DestinationDetail = () => {
   const { slug } = useParams();
+  const { pathname } = useLocation();
   const pkg = slug && Object.prototype.hasOwnProperty.call(packages, slug) ? packages[slug] : undefined;
   const price = pkg ? Number(pkg.packageRate.replace(/[^0-9]/g, "")) : 0;
 
@@ -37,7 +38,7 @@ const DestinationDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main id="main-content" tabIndex={-1}>
+      <main id="main-content" data-page-path={pathname} tabIndex={-1}>
         <nav aria-label="Breadcrumb" className="container mx-auto max-w-6xl px-4 md:px-6 py-5 text-sm text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-2">
             <li><Link to="/" className="hover:text-primary hover:underline">Home</Link></li>
@@ -52,6 +53,19 @@ const DestinationDetail = () => {
             <div className="flex flex-wrap gap-2 mb-4">{pkg.tags.map(tag => <Badge key={tag} variant="secondary" className="bg-white/15 text-white border-white/20">{tag.replace(/^#/, "")}</Badge>)}</div>
             <h1 className="max-w-3xl text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">{pkg.packageName}</h1>
             <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm md:text-base"><span className="flex items-center gap-2"><MapPin aria-hidden="true" className="h-4 w-4" />{pkg.location.city}, {pkg.location.country}</span><span className="flex items-center gap-2"><Clock aria-hidden="true" className="h-4 w-4" />{pkg.duration}</span><span className="flex items-center gap-2"><Route aria-hidden="true" className="h-4 w-4" />{pkg.pickAndDrop}</span></div>
+          </div>
+        </section>
+
+        <section aria-label="Request a quote for this trip" className="border-b bg-card lg:hidden">
+          <div className="container max-w-6xl mx-auto px-4 py-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
+            <div>
+              <p className="text-xl font-bold text-primary">{pkg.packageRate}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Indicative price per person · Confirm dates and availability</p>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 sm:mt-0">
+              <Button asChild className="min-h-11"><Link to={`/quotes?${query}`} onClick={() => trackEvent("select_item", { item_id: slug, item_name: pkg.packageName, source: "mobile_package_quote" })}>Get a quote<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></Button>
+              <Button asChild variant="outline" className="min-h-11"><Link to={`/customize?${query}`}>Customize trip</Link></Button>
+            </div>
           </div>
         </section>
 

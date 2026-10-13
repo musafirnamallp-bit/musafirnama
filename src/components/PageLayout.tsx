@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -12,10 +12,12 @@ interface PageLayoutProps {
   children: ReactNode;
 }
 
-const PageLayout = ({ title, description, eyebrow, parent, children }: PageLayoutProps) => (
+const PageLayout = ({ title, description, eyebrow, parent, children }: PageLayoutProps) => {
+  const { pathname } = useLocation();
+  return (
   <div className="min-h-screen flex flex-col bg-background">
     <Navigation />
-    <main id="main-content" tabIndex={-1} className="flex-1">
+    <main id="main-content" data-page-path={pathname} tabIndex={-1} className="flex-1">
       <header className="border-b bg-muted/30">
         <div className="container max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16">
           <nav aria-label="Breadcrumb" className="mb-8 text-sm text-muted-foreground">
@@ -35,5 +37,6 @@ const PageLayout = ({ title, description, eyebrow, parent, children }: PageLayou
     <Footer />
   </div>
 );
+};
 
 export default PageLayout;

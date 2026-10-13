@@ -31,7 +31,7 @@ const TopPackages = () => (
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{pkg.pickAndDrop}</p>
               <div className="mb-5 mt-3 flex flex-wrap gap-1.5">{pkg.tags.slice(0, 2).map((tag) => <Badge key={tag} variant="secondary" className="font-normal">{tag.replace(/^#/, "")}</Badge>)}</div>
               <div className="mt-auto border-t pt-4">
-                <p className="mb-4 flex flex-wrap items-baseline gap-x-2"><span className="text-xs text-muted-foreground">Guide price</span><span className="text-lg font-semibold text-primary">{pkg.packageRate}</span></p>
+                <p className="mb-4 flex flex-wrap items-baseline gap-x-2"><span className="text-lg font-semibold text-primary">{pkg.packageRate}</span><span className="text-xs text-muted-foreground">Indicative price per person</span></p>
                 <Button asChild variant="outline" className="w-full"><a href={`/destination/${slug}`} aria-label={`View ${pkg.packageName}`} onClick={() => trackEvent("select_item", { item_id: slug, item_name: pkg.packageName, source: "home_packages" })}>View trip details <ArrowRight aria-hidden="true" /></a></Button>
               </div>
             </CardContent>

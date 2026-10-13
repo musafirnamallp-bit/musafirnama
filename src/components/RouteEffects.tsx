@@ -1,10 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { absoluteUrl, getPageMetadata, structuredData } from "@/lib/seo";
 import { trackPageView } from "@/lib/analytics";
+import { focusRouteContent } from "./routeFocus";
 
 export default function RouteEffects() {
   const { pathname, hash } = useLocation();
+  const previousPath = useRef(pathname);
   useEffect(() => {
     const meta = getPageMetadata(pathname);
     document.title = meta.title;
@@ -29,15 +31,16 @@ export default function RouteEffects() {
     trackPageView(pathname, meta.title);
   }, [pathname]);
   useEffect(() => {
-    if (!hash) { window.scrollTo({ top: 0, behavior: "instant" }); return; }
-    let id: string;
-    try { id = decodeURIComponent(hash.slice(1)); } catch { return; }
-    const scroll = () => document.getElementById(id)?.scrollIntoView();
-    scroll();
-    const observer = new MutationObserver(scroll);
-    observer.observe(document.getElementById("root")!, { childList: true, subtree: true });
-    const timer = window.setTimeout(() => observer.disconnect(), 2000);
-    return () => { observer.disconnect(); window.clearTimeout(timer); };
+    const routeChanged = previousPath.current !== pathname;
+    previousPath.current = pathname;
+    if (!hash) window.scrollTo({ top: 0, behavior: "instant" });
+    // A document load already establishes reading order. Move focus only for
+    // a client-side page change or an explicitly requested fragment.
+    if (!routeChanged && !hash) return;
+    // A shared static 404 document must keep the same marker when hydrated at
+    // an unknown URL; using the unknown pathname there would mismatch its HTML.
+    const pagePath = getPageMetadata(pathname).path === "/404" ? "/404" : pathname;
+    return focusRouteContent(pagePath, hash);
   }, [pathname, hash]);
   return null;
 }
