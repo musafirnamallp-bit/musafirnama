@@ -1,0 +1,43 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { absoluteUrl, getPageMetadata, structuredData } from "@/lib/seo";
+import { trackPageView } from "@/lib/analytics";
+
+export default function RouteEffects() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    const meta = getPageMetadata(pathname);
+    document.title = meta.title;
+    const tags: Record<string, string> = {
+      description: meta.description, robots: meta.noindex ? "noindex,follow" : "index,follow",
+      "og:title": meta.title, "og:description": meta.description, "og:type": meta.type || "website",
+      "og:url": absoluteUrl(meta.path), "og:image": absoluteUrl(meta.image), "og:site_name": "Musafirnama",
+      "twitter:card": "summary_large_image", "twitter:title": meta.title, "twitter:description": meta.description, "twitter:image": absoluteUrl(meta.image),
+    };
+    for (const [key, value] of Object.entries(tags)) {
+      const attr = key.startsWith("og:") ? "property" : "name";
+      let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, key); document.head.appendChild(tag); }
+      tag.content = value;
+    }
+    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
+    canonical.href = absoluteUrl(meta.path);
+    let schema = document.getElementById("site-schema");
+    if (!schema) { schema = document.createElement("script"); schema.id = "site-schema"; schema.setAttribute("type", "application/ld+json"); document.head.appendChild(schema); }
+    schema.textContent = JSON.stringify(structuredData(meta));
+    trackPageView(pathname, meta.title);
+  }, [pathname]);
+  useEffect(() => {
+    if (!hash) { window.scrollTo({ top: 0, behavior: "instant" }); return; }
+    let id: string;
+    try { id = decodeURIComponent(hash.slice(1)); } catch { return; }
+    const scroll = () => document.getElementById(id)?.scrollIntoView();
+    scroll();
+    const observer = new MutationObserver(scroll);
+    observer.observe(document.getElementById("root")!, { childList: true, subtree: true });
+    const timer = window.setTimeout(() => observer.disconnect(), 2000);
+    return () => { observer.disconnect(); window.clearTimeout(timer); };
+  }, [pathname, hash]);
+  return null;
+}

@@ -1,11 +1,11 @@
-import parisImg from "@/assets/paris.jpg";
-import baliImg from "@/assets/bali.jpg";
-import tokyoImg from "@/assets/tokyo.jpg";
-import swissAlpsImg from "@/assets/swiss-alps.jpg";
-import goaImg from "@/assets/goa.jpg";
-import rajasthanImg from "@/assets/rajasthan.jpg";
-import keralaImg from "@/assets/kerala.jpg";
-import santoriniImg from "@/assets/santorini.jpg";
+import parisImg from "@/assets/paris.webp";
+import baliImg from "@/assets/bali.webp";
+import tokyoImg from "@/assets/tokyo.webp";
+import swissAlpsImg from "@/assets/swiss-alps.webp";
+import goaImg from "@/assets/goa.webp";
+import rajasthanImg from "@/assets/rajasthan.webp";
+import keralaImg from "@/assets/kerala.webp";
+import santoriniImg from "@/assets/santorini.webp";
 
 export interface ItineraryDay {
   day: string;

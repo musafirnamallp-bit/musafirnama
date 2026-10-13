@@ -1,117 +1,36 @@
+import { ArrowRight, CalendarDays, Hotel, IndianRupee, MapPin, Plane, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plane, Hotel, MapPin, Calendar, Users, DollarSign } from "lucide-react";
 
-const CustomizationSection = () => {
-  const customizationOptions = [
-    { icon: Plane, label: "Flights", options: ["Economy", "Business", "Direct Routes"] },
-    { icon: Hotel, label: "Hotels", options: ["5-Star", "Boutique", "Local Stays"] },
-    { icon: MapPin, label: "Sightseeing", options: ["Must-See", "Hidden Gems", "Local Tours"] },
-    { icon: Calendar, label: "Activities", options: ["Adventure", "Cultural", "Relaxation"] },
-    { icon: Users, label: "Group Size", options: ["Solo", "Couple", "Family", "Friends"] },
-    { icon: DollarSign, label: "Budget", options: ["Budget", "Mid-Range", "Luxury"] }
-  ];
+const preferences = [
+  { icon: MapPin, title: "Your destination", detail: "One place or a journey through several" },
+  { icon: CalendarDays, title: "Your dates", detail: "A long weekend or a longer escape" },
+  { icon: Users, title: "Your people", detail: "Solo, together, or with the whole family" },
+  { icon: Hotel, title: "Your stay", detail: "Share your preferred hotel style" },
+  { icon: Plane, title: "Your journey", detail: "Tell us where you will start from" },
+  { icon: IndianRupee, title: "Your budget", detail: "A plan built around what works for you" },
+];
 
-  return (
-    <section className="py-20 md:px-6 bg-background">
-      <div className="container mx-auto md:max-w-7xl">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side - Content */}
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                No Two Trips Should Be the Same
-              </h2>
-              <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-                Every traveler is unique, and so should be their journey. Customize every aspect 
-                of your trip - from flights and hotels to sightseeing and activities - to match 
-                your personal preferences and budget. Our platform puts you in control of creating 
-                your perfect travel experience.
-              </p>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span className="text-muted-foreground">Choose from multiple flight options and classes</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span className="text-muted-foreground">Select accommodations that match your style</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span className="text-muted-foreground">Build your itinerary with activities you love</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span className="text-muted-foreground">Adjust everything to fit your budget perfectly</span>
-                </div>
-              </div>
-              <Button 
-                size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4"
-                onClick={() => window.location.href = '/customize'}
-              >
-                Start Customizing
-              </Button>
-            </div>
-          </div>
-
-          {/* Right Side - Interactive Mockup */}
-          <div className="relative">
-            <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-2xl p-4 md:p-8 border">
-              <h3 className="text-2xl font-semibold mb-6 text-center">Customize Your Trip</h3>
-              
-              <div className="grid gap-4">
-                {customizationOptions.map((option, index) => {
-                  const IconComponent = option.icon;
-                  return (
-                    <Card key={index} className="transition-all duration-300 hover:shadow-md hover:scale-102 bg-card/80 backdrop-blur-sm">
-                      <CardContent className="p-2 md:p-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <IconComponent className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium mb-2">{option.label}</h4>
-                            <div className="flex flex-wrap gap-1">
-                              {option.options.map((opt, optIndex) => (
-                                <Badge 
-                                  key={optIndex} 
-                                  variant={optIndex === 0 ? "default" : "secondary"} 
-                                  className="text-xs"
-                                >
-                                  {opt}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Estimated Total:</span>
-                  <span className="text-2xl font-bold text-primary">₹1,25,999</span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Based on your selections • Get exact quotes from agents
-                </p>
-              </div>
-            </div>
-
-            {/* Floating elements for visual appeal */}
-            <div className="absolute -top-4 -right-4 w-16 h-16 bg-primary/20 rounded-full animate-pulse"></div>
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-secondary/30 rounded-full animate-pulse delay-100"></div>
-          </div>
-        </div>
+const CustomizationSection = () => (
+  <section id="customize" aria-labelledby="customize-title" className="bg-muted/40 py-16 sm:py-24">
+    <div className="container grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+      <div className="max-w-xl">
+        <p className="section-kicker">Made around you</p>
+        <h2 id="customize-title" className="section-title">No two travelers.<br />No two identical trips.</h2>
+        <p className="mt-6 text-lg leading-8 text-muted-foreground">A slower morning. An extra day by the sea. Room for the whole family. Tell us what matters, and use it as the starting point for your holiday.</p>
+        <p className="mt-4 leading-7 text-muted-foreground">Already have a destination in mind? Share your preferences to request a tailored plan and quote.</p>
+        <Button asChild size="lg" className="mt-8"><a href="/customize">Customize my trip <ArrowRight aria-hidden="true" /></a></Button>
       </div>
-    </section>
-  );
-};
+      <div className="grid gap-4 sm:grid-cols-2">
+        {preferences.map(({ icon: Icon, title, detail }) => (
+          <div key={title} className="rounded-xl border border-border/80 bg-background p-5">
+            <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
+            <h3 className="mb-2 font-semibold">{title}</h3>
+            <p className="text-sm leading-6 text-muted-foreground">{detail}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default CustomizationSection;

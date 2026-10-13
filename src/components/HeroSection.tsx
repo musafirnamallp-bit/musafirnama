@@ -1,108 +1,36 @@
-import { useState, useEffect } from "react";
+import { ArrowRight, Check, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Shield, CheckCircle, Star } from "lucide-react";
-import heroImage1 from "@/assets/hero-travel-1.jpg";
-import heroImage2 from "@/assets/hero-travel-2.jpg";
-import heroImage3 from "@/assets/hero-travel-3.jpg";
+import { trackEvent } from "@/lib/analytics";
+import heroSmall from "@/assets/hero-travel-768.webp";
+import heroMedium from "@/assets/hero-travel-1280.webp";
+import heroLarge from "@/assets/hero-travel-1920.webp";
 
-const HeroSection = () => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const heroImages = [heroImage1, heroImage2, heroImage3];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [heroImages.length]);
-
-  return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image Carousel */}
-      <div className="absolute inset-0 z-0">
-        {heroImages.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
-              index === currentImageIndex ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ backgroundImage: `url(${image})` }}
-          />
-        ))}
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-6 text-center text-white">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Main Headlines */}
-          <div className="space-y-6">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight animate-fade-in">
-              Your Trip. Your Way.
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed animate-fade-in">
-              Tell us your travel dream — get multiple customized quotes from verified agents 
-              and choose the perfect one for your budget.
-            </p>
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
-            <Button 
-              size="lg" 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 hover:scale-105 shadow-lg"
-              onClick={() => window.location.href = '/quotes'}
-            >
-              Get Free Quotes
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-white/30 bg-white/10 text-white hover:bg-white/20 px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm"
-              onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Browse Packages
-            </Button>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8 animate-fade-in">
-            <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2 text-sm font-medium">
-              <Shield className="h-4 w-4 mr-2" />
-              Verified Agents
-            </Badge>
-            <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2 text-sm font-medium">
-              <Star className="h-4 w-4 mr-2" />
-              Best Price Guarantee
-            </Badge>
-            <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2 text-sm font-medium">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Trusted by 50K+ Travelers
-            </Badge>
-          </div>
-
-          {/* Carousel Indicators */}
-          <div className="flex justify-center space-x-2 pt-8">
-            {heroImages.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImageIndex(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex 
-                    ? "bg-white scale-110" 
-                    : "bg-white/50 hover:bg-white/70"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
+const HeroSection = () => (
+  <section id="top" aria-labelledby="hero-title" className="relative isolate flex min-h-[600px] items-center overflow-hidden bg-primary py-16 sm:min-h-[650px] sm:py-24">
+    <picture className="absolute inset-0 -z-20">
+      <source type="image/webp" srcSet={`${heroSmall} 768w, ${heroMedium} 1280w, ${heroLarge} 1920w`} sizes="100vw" />
+      <img src={heroLarge} alt="" width={1920} height={1080} {...{ fetchpriority: "high" }} loading="eager" className="h-full w-full object-cover object-[60%_center]" />
+    </picture>
+    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/55 to-black/20" />
+    <div className="container text-white">
+      <div className="max-w-3xl">
+        <p className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90"><Compass className="h-4 w-4 shrink-0" aria-hidden="true" />India &amp; international holidays</p>
+        <h1 id="hero-title" className="max-w-2xl text-5xl font-semibold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">Your trip.<br /><span className="text-[hsl(var(--sand))]">Your way.</span></h1>
+        <p className="mt-6 max-w-xl text-lg leading-8 text-white/90 sm:text-xl">India getaways and international holidays, planned around your dates, your budget, and the things you love.</p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button asChild size="lg" className="h-[52px] border-0 bg-white px-7 text-base font-semibold text-primary hover:bg-white/90">
+            <a href="/quotes" onClick={() => trackEvent("cta_click", { source: "home_hero", method: "quote" })}>Plan my trip <ArrowRight aria-hidden="true" /></a>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-[52px] border-white/60 bg-transparent px-7 text-base text-white hover:bg-white/10 hover:text-white">
+            <a href="/#packages">Explore holiday packages</a>
+          </Button>
         </div>
+        <ul className="mt-9 flex flex-col gap-3 text-sm text-white/90 sm:flex-row sm:flex-wrap sm:gap-x-6">
+          {["Share your travel wishlist", "Choose your budget", "Review your trip details"].map((label) => <li key={label} className="flex items-center gap-2"><Check className="h-4 w-4 text-[hsl(var(--sand))]" aria-hidden="true" />{label}</li>)}
+        </ul>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default HeroSection;

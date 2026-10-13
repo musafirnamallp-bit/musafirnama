@@ -1,73 +1,76 @@
-# Welcome to your Lovable project
+# Musafirnama
 
-## Project info
+Tours and travel website at [www.musafirnama.in](https://www.musafirnama.in/), built with React 18, TypeScript, Vite, Tailwind CSS, and shadcn/ui.
 
-**URL**: https://lovable.dev/projects/00d4019c-8270-4978-a647-153c3a3473db
+Repository: [musafirnamallp-bit/musafirnama](https://github.com/musafirnamallp-bit/musafirnama). Vercel project: `musafirnama`. Use the business account `musafirnamallp-bit` / `musafirnamallp@gmail.com` for project administration. Account credentials are separate from the public contact information shown on the website.
 
-## How can I edit this code?
+## Local development
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/00d4019c-8270-4978-a647-153c3a3473db) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Run commands from this repository directory. Use Node.js with built-in TypeScript support: tests import `.ts` files directly. Local tooling was checked with Node.js 26.11.1.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The development server uses port **8080**. Optional configuration can remain empty. Restart Vite after changing environment variables.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Build, check, and preview
 
-**Use GitHub Codespaces**
+Run the deployment checks in this order; the tests inspect the generated site in `dist`:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+npm run typecheck
+npm run build
+npm test
+npm run preview
+```
 
-## What technologies are used for this project?
+The production preview is available at **http://127.0.0.1:4173**; set `PORT` to change it. It serves clean URLs, redirects, and real HTTP 404 responses. `npm run lint` is also available for repository linting.
 
-This project is built with:
+Tests cover quote validation and API response handling, local mock endpoint restrictions, analytics consent, and generated HTML. The site checks verify sitemap coverage, rendered headings, unique metadata, canonical URLs, JSON-LD, internal links and anchors, image assets, and indexing rules. Automated enquiry tests use mocks and do not send real leads.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## How the site is built
 
-## How can I deploy this project?
+- `src/App.tsx` defines routes; route components are split into separate JavaScript bundles.
+- `src/entry-server.tsx` renders each route at build time. `scripts/prerender.mjs` writes complete HTML, page metadata, JSON-LD, `sitemap.xml`, and `robots.txt` into `dist`.
+- `src/main.tsx` hydrates that HTML in the browser. `dist-ssr` is an intermediate build output, not the deployment directory.
+- `src/lib/seo.ts` owns metadata and the lists of public and prerendered routes. Quote/customization forms and the 404 page are `noindex` and excluded from the sitemap.
+- `src/lib/packageData.ts` contains destination/package content; `src/lib/travelGuides.ts` contains editorial guides. Prices are indicative and itineraries are examples, subject to a confirmed quote.
+- `src/components/QuoteRequestForm.tsx` powers both enquiry flows. `src/lib/siteConfig.ts` owns optional public contact details; `src/lib/analytics.ts` owns tracking.
 
-Simply open [Lovable](https://lovable.dev/projects/00d4019c-8270-4978-a647-153c3a3473db) and click on Share -> Publish.
+When adding a page, update routing and the SEO/prerender configuration together, add internal links, then rebuild and run the tests. Keep package details and published travel guidance current. Image assets are bundled with hashed filenames; the homepage uses one responsive WebP hero.
 
-## Can I connect a custom domain to my Lovable project?
+## Environment configuration
 
-Yes, you can!
+`.env.example` contains empty public configuration values. Copy it to the ignored `.env.local` for local use. Configure the same variables in the relevant Vercel environment for deployments.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+| Variable | Purpose |
+| --- | --- |
+| `VITE_BUSINESS_PHONE` | Owner-approved public phone number, preferably including country code. |
+| `VITE_WHATSAPP_NUMBER` | Public WhatsApp number including country code; formatting is normalized to digits. |
+| `VITE_BUSINESS_EMAIL` | Owner-approved public enquiry email address. |
+| `VITE_GA4_MEASUREMENT_ID` | Optional GA4 web-stream ID in `G-…` format. |
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Missing contact values hide the corresponding direct contact links. Missing or invalid GA4 configuration leaves analytics disabled. All `VITE_*` values are embedded in browser assets: never place passwords, private API keys, or other secrets there. These values are read at build time, so production changes require a rebuild and deployment.
+
+For a local form integration test, `VITE_QUOTE_API_URL` can point to an HTTP mock on `localhost` or `127.0.0.1`. This override only applies during development, requires a separately running mock server, and rejects other hosts. Production builds always use the existing AWS endpoint. Without a local override, even the development form uses that real endpoint.
+
+## Enquiry backend and analytics limits
+
+Enquiries are posted directly to the existing AWS API Gateway endpoint defined in `src/lib/quoteEndpoint.ts`. This repository contains the frontend integration, not the backend, database, email delivery, or CRM. Requests have a 20-second timeout. A successful HTTP response only counts as accepted when the response JSON also contains an application `statusCode` in the 200–299 range without an explicit failure. Network errors and timeouts are shown as unconfirmed, with the entered details retained on the page.
+
+Frontend success and mocked tests do not verify delivery to a business inbox or CRM, lead storage, or an eventual booking. Confirm that separately with an authorized test enquiry and the backend owner. Do not change the payload contract or production endpoint without coordinating the backend.
+
+When a valid GA4 ID is configured, the Google tag loads only after the visitor accepts analytics. Preferences can be changed from the privacy page. Manual events include page views, package/contact/CTA interactions, form starts, and `generate_lead` after confirmed API acceptance. Names, email addresses, phone numbers, enquiry free text, and URL query strings are excluded from those event payloads. Declining analytics does not prevent an enquiry.
+
+A configured ID does not itself prove that GA4 is receiving events. Check the intended GA4 property after configuration and consent; consent refusal or browser blocking reduces measured totals. A lead event represents an accepted enquiry, not a confirmed booking or revenue. Booking/CRM attribution, Google Search Console verification, and advertising accounts require separate setup.
+
+## Deployment
+
+Vercel installs dependencies with `npm ci` and runs `npm run typecheck && npm run build && npm test`, as configured in `vercel.json`. Deploy the **`dist`** output to the existing business project. Confirm the linked project and account before a CLI deployment; `.vercel` is local, ignored configuration.
+
+Keep the clean-URL settings, legacy redirects, and custom `404.html` behavior. Do not restore a catch-all rewrite to `index.html`: unknown URLs must return HTTP 404. Hashed `/assets/` files receive long-lived immutable caching.
+
+After deployment, check the canonical `www` domain, a destination and guide page, a real missing URL, legacy redirects, the sitemap, and enquiry navigation. Public page checks do not confirm backend lead delivery or Google indexing. Local edits only become live after a deployment.

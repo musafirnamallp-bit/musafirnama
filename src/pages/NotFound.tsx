@@ -1,27 +1,12 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 
-const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
-    </div>
-  );
-};
-
-export default NotFound;
+export default function NotFound() {
+  return <><Navigation /><main id="main-content" tabIndex={-1} className="container mx-auto flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center">
+    <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">404 · A small detour</p>
+    <h1 className="mb-4 text-4xl font-bold">This page is off the map.</h1>
+    <p className="mb-8 max-w-md text-muted-foreground">The link may have changed. Find your next destination or head back to the homepage.</p>
+    <div className="flex flex-wrap justify-center gap-3"><Button asChild><a href="/destinations">Explore destinations</a></Button><Button variant="outline" asChild><a href="/">Back to home</a></Button></div>
+  </main><Footer /></>;
+}

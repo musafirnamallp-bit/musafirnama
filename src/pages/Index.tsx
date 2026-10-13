@@ -7,29 +7,19 @@ import TestimonialSection from "@/components/TestimonialSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
-const Index = () => {
-  return (
-    <div className="min-h-screen">
-      <Navigation />
-      <main>
-        <section id="top">
-          <HeroSection />
-        </section>
-        <section id="how-it-works">
-          <HowItWorks />
-        </section>
-        <section id="packages">
-          <TopPackages />
-        </section>
-        <section id="customize">
-          <CustomizationSection />
-        </section>
-        <TestimonialSection />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
-  );
-};
+const Index = () => (
+  <div className="min-h-screen">
+    <Navigation />
+    <main id="main-content" tabIndex={-1}>
+      <HeroSection />
+      <TopPackages />
+      <HowItWorks />
+      <CustomizationSection />
+      <TestimonialSection />
+      <CTASection />
+    </main>
+    <Footer />
+  </div>
+);
 
 export default Index;
