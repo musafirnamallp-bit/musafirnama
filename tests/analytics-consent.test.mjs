@@ -27,12 +27,12 @@ function browserHarness() {
   };
   const window = {
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
-    location: { pathname: "/quotes", search: "?email=traveler%40example.com" },
+    location: { pathname: "/quotes", search: "?email=traveler%40example.com", hash: "#phone=919876543210", href: "https://www.musafirnama.in/quotes?email=traveler%40example.com#phone=919876543210" },
   };
   const module = { exports: {} };
   vm.runInNewContext(compiled, { module, exports: module.exports, window, document, URL });
   const commands = () => Array.from(window.dataLayer || [], command => Array.from(command));
-  return { analytics: module.exports, window, scripts, commands };
+  return { analytics: module.exports, window, document, scripts, commands };
 }
 
 test("analytics waits for consent, stops on withdrawal, and resumes after renewed acceptance without sharing enquiry PII", () => {
@@ -52,7 +52,7 @@ test("analytics waits for consent, stops on withdrawal, and resumes after renewe
   });
   const firstLead = commands().find(command => command[0] === "event" && command[1] === "generate_lead");
   assert.ok(firstLead, "Accepted analytics should receive a lead event");
-  assert.deepEqual(Object.keys(firstLead[2]).sort(), ["budget", "form_name", "travelers"]);
+  assert.deepEqual(Object.keys(firstLead[2]).sort(), ["budget", "form_name", "page_location", "page_path", "page_referrer", "page_title", "travelers"]);
 
   analytics.saveAnalyticsConsent("declined");
   assert.equal(window["ga-disable-G-TEST123"], true);
@@ -82,4 +82,48 @@ test("analytics waits for consent, stops on withdrawal, and resumes after renewe
     assert.equal(event.page_referrer, "https://referrer.example");
   }
   assert.doesNotMatch(JSON.stringify(commands()), /traveler@example|traveler%40|Test Traveler|919876543210|Private enquiry notes/);
+});
+
+test("safe global URL context precedes tag configuration and follows SPA routes and custom events", () => {
+  const { analytics, window, document, commands } = browserHarness();
+  document.referrer = "https://user:password@referrer.example/private/person?email=traveler%40example.com#private-fragment";
+  analytics.saveAnalyticsConsent("accepted");
+
+  const queued = commands();
+  const configIndex = queued.findIndex(command => command[0] === "config");
+  const globalIndex = queued.findIndex(command => command[0] === "set");
+  assert.ok(globalIndex >= 0 && globalIndex < configIndex, "Sanitized defaults must be queued before the tag config");
+  assert.equal(queued[globalIndex][1].page_location, "https://www.musafirnama.in/quotes");
+  assert.equal(queued[globalIndex][1].page_referrer, "https://referrer.example");
+
+  window.location.pathname = "/customize";
+  window.location.search = "?email=traveler%40example.com";
+  window.location.hash = "#phone=919876543210";
+  window.location.href = "https://www.musafirnama.in/customize?email=traveler%40example.com#phone=919876543210";
+  document.title = "Customize a trip";
+  analytics.trackPageView(window.location.pathname + window.location.search + window.location.hash, document.title);
+  const routeCommands = commands();
+  const routeDefaults = routeCommands.filter(command => command[0] === "set").at(-1)[1];
+  assert.equal(routeDefaults.page_location, "https://www.musafirnama.in/customize");
+  assert.equal(routeDefaults.page_path, "/customize");
+  assert.equal(routeDefaults.page_title, "Customize a trip");
+
+  analytics.trackEvent("cta_click", {
+    source: "home_hero",
+    page_location: window.location.href,
+    page_referrer: document.referrer,
+    page_path: "/unsafe?email=traveler%40example.com",
+  });
+  const customEvent = commands().find(command => command[0] === "event" && command[1] === "cta_click")[2];
+  assert.equal(customEvent.page_location, "https://www.musafirnama.in/customize", "Custom events need explicit sanitized URLs too");
+  assert.equal(customEvent.page_referrer, "https://referrer.example");
+  assert.equal(customEvent.page_path, "/customize");
+  assert.equal(customEvent.source, "home_hero");
+  assert.doesNotMatch(JSON.stringify(commands()), /traveler(?:@|%40)|919876543210|user:password|private\/person|private-fragment/);
+
+  for (const referrer of ["", "not a URL", "data:text/plain,private", "javascript:private"]) {
+    document.referrer = referrer;
+    analytics.trackEvent("form_start", { form_name: "customize_trip" });
+    assert.equal(commands().at(-1)[2].page_referrer, "", `Unsafe referrer must be empty: ${referrer}`);
+  }
 });
